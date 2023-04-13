@@ -1,8 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/fayzullayev/medium_go/getting_started_with_go/mymodule"
+)
 
 func main() {
-	fmt.Println("Hello!")
+	fmt.Println(mymodule.Name)
 
 }
