@@ -1,11 +1,131 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+	"os"
+)
+
+type TodoList struct {
+	TodoCount int
+	Todos     []string
+}
+
+func errorCheck(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func write(w http.ResponseWriter, msg string) {
+	_, err := w.Write([]byte(msg))
+
+	if err != nil {
+		errorCheck(err)
+	}
+}
+
+func english(w http.ResponseWriter, r *http.Request) {
+	write(w, "Hello Internet")
+}
+
+func spanish(w http.ResponseWriter, r *http.Request) {
+	write(w, "Hola Internet")
+}
+
+func interactHandler(w http.ResponseWriter, r *http.Request) {
+	todos := getStrings("data.txt")
+
+	fmt.Printf("%#v\n", todos)
+
+	tmpl, err := template.ParseFiles("view.html")
+	errorCheck(err)
+
+	todoss := TodoList{
+		TodoCount: len(todos),
+		Todos:     todos,
+	}
+	err = tmpl.Execute(w, todoss)
+
+}
+
+func newHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("new.html")
+
+	errorCheck(err)
+
+	err = tmpl.Execute(w, nil)
+	errorCheck(err)
+}
+
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	todo := r.FormValue("todo")
+
+	options := os.O_WRONLY | os.O_APPEND | os.O_CREATE
+	file, err := os.OpenFile("data.txt", options, os.FileMode(0600))
+	errorCheck(err)
+	_, err = fmt.Fprintln(file, todo)
+	errorCheck(err)
+	err = file.Close()
+	errorCheck(err)
+
+	http.Redirect(w, r, "/interact", http.StatusFound)
+}
+
+func getStrings(fileName string) []string {
+	var lines []string
+
+	file, err := os.Open(fileName)
+
+	if os.IsNotExist(err) {
+		return nil
+	}
+
+	errorCheck(err)
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	errorCheck(scanner.Err())
+
+	return lines
+}
 
 func main() {
 
-	var a = 11 / 2          // 5.5 (float64)
-	var b = float32(11) / 2 // 5.5 (float32)
+	//http.HandleFunc("/hello", english)
+	//http.HandleFunc("/hola", spanish)
+	//http.HandleFunc("/interact", interactHandler)
+	//http.HandleFunc("/new", newHandler)
+	//http.HandleFunc("/create", createHandler)
 
-	fmt.Println(a, b)
+	//log.Fatal(http.ListenAndServe(":4003", nil))
+
+	nums := []int{1, 2, 3}
+	fmt.Println(nums)
+
+	newNums := mapFun(nums, func(num int) int {
+		return num * 2
+	})
+
+	fmt.Println(newNums)
+
+}
+
+func mapFun[T int | float64](values []T, myFunc func(T) T) []T {
+	var newValues []T
+
+	for _, v := range values {
+		newValues = append(newValues, myFunc(v))
+	}
+
+	return newValues
 }
