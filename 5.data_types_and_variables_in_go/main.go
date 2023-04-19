@@ -39,8 +39,6 @@ func spanish(w http.ResponseWriter, r *http.Request) {
 func interactHandler(w http.ResponseWriter, r *http.Request) {
 	todos := getStrings("data.txt")
 
-	fmt.Printf("%#v\n", todos)
-
 	tmpl, err := template.ParseFiles("view.html")
 	errorCheck(err)
 
@@ -101,31 +99,12 @@ func getStrings(fileName string) []string {
 
 func main() {
 
-	//http.HandleFunc("/hello", english)
-	//http.HandleFunc("/hola", spanish)
-	//http.HandleFunc("/interact", interactHandler)
-	//http.HandleFunc("/new", newHandler)
-	//http.HandleFunc("/create", createHandler)
+	http.HandleFunc("/hello", english)
+	http.HandleFunc("/hola", spanish)
+	http.HandleFunc("/interact", interactHandler)
+	http.HandleFunc("/new", newHandler)
+	http.HandleFunc("/create", createHandler)
 
-	//log.Fatal(http.ListenAndServe(":4003", nil))
+	log.Fatal(http.ListenAndServe(":4003", nil))
 
-	nums := []int{1, 2, 3}
-	fmt.Println(nums)
-
-	newNums := mapFun(nums, func(num int) int {
-		return num * 2
-	})
-
-	fmt.Println(newNums)
-
-}
-
-func mapFun[T int | float64](values []T, myFunc func(T) T) []T {
-	var newValues []T
-
-	for _, v := range values {
-		newValues = append(newValues, myFunc(v))
-	}
-
-	return newValues
 }
