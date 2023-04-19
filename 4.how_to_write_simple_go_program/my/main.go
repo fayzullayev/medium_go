@@ -1,3 +1,3 @@
-package my
+package mys
 
 var Name = "Mirodil"
